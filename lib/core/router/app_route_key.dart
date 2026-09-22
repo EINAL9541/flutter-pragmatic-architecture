@@ -1,5 +1,4 @@
-enum RouteKeys{
-
+enum RouteKeys {
   home('/'),
   post('posts/:id');
 
@@ -9,8 +8,13 @@ enum RouteKeys{
 
   String get routeName => name;
 
-  ///Example[context.go(RouteKeys.post.withId(123));]
-  String withId(int id){
+  /// Builds the route path with the given ID.
+  /// 
+  /// Example: 
+  /// ```dart 
+  /// context.go(RouteKeys.post.withId(123)); 
+  /// ```
+  String withId(int id) {
     return path.replaceFirst(':id', id.toString());
   }
 }
