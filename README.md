@@ -61,7 +61,7 @@ Successful response:
 ```json
 {
   "data": {
-    "username": "aungeinal@gmail.com",
+    "username": "example@gmail.com",
     "nextStep": "OTP_GENERATED",
     "poolToken": null
   },

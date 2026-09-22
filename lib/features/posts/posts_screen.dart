@@ -30,7 +30,9 @@ class PostsScreen extends HookWidget {
     }
 
     useEffect(() {
-      loadPosts();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) loadPosts();
+      });
       return null;
     }, [repository]);
 

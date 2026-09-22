@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_pragmatic_architecture/core/global/app_setting_provider.dart';
 import 'package:flutter_pragmatic_architecture/core/global/auth_info_provider.dart';
 import 'package:flutter_pragmatic_architecture/core/router/app_router.dart';

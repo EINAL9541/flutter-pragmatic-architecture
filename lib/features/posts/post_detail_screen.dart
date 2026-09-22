@@ -24,7 +24,9 @@ class PostDetailScreen extends HookWidget {
     }
 
     useEffect(() {
-      loadPost();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) loadPost();
+      });
       return null;
     }, [repository, postId]);
 
