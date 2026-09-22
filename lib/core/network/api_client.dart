@@ -1,33 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../model/base_response.dart';
+import 'network_clients.dart';
 import 'network_exception.dart';
-import 'environment.dart';
-import 'interceptors/auth_interceptor.dart';
-import 'interceptors/logging_interceptor.dart';
-
-class NetworkClients {
-  static final Dio public = _createDio();
-  static final Dio secure = _createDio(authenticated: true);
-
-  static Dio _createDio({bool authenticated = false}) {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: Environment.baseUrl,
-        connectTimeout: Environment.connectTimeout,
-        receiveTimeout: Environment.receiveTimeout,
-        sendTimeout: Environment.sendTimeout,
-      ),
-    );
-    if (authenticated) {
-      dio.interceptors.add(
-        AuthInterceptor(retry: (options) => dio.fetch(options)),
-      );
-    }
-    dio.interceptors.add(LoggingInterceptor());
-    return dio;
-  }
-}
 
 abstract class ApiClient {
   final Dio client;
@@ -36,6 +11,21 @@ abstract class ApiClient {
   Future<T> requestData<T>(
     Future<Response<Map<String, dynamic>>> Function() action, {
     required T Function(Object? data) fromJson,
+  }) async {
+    final data = await _request(action, fromJson: fromJson, requireData: true);
+    return data!;
+  }
+
+  Future<void> requestVoid(
+    Future<Response<Map<String, dynamic>>> Function() action,
+  ) async {
+    await _request<void>(action, fromJson: (_) {}, requireData: false);
+  }
+
+  Future<T?> _request<T>(
+    Future<Response<Map<String, dynamic>>> Function() action, {
+    required T Function(Object? data) fromJson,
+    required bool requireData,
   }) async {
     final response = await action();
     final json = response.data;
@@ -48,36 +38,14 @@ abstract class ApiClient {
     }
 
     final envelope = BaseResponse<T>.fromJson(json, fromJson);
-    if (!envelope.success || envelope.data == null) {
+    if (!envelope.success || (requireData && envelope.data == null)) {
       throw NetworkException(
         message: envelope.message,
         statusCode: envelope.status,
       );
     }
 
-    return envelope.data!;
-  }
-
-  Future<void> requestVoid(
-    Future<Response<Map<String, dynamic>>> Function() action,
-  ) async {
-    final response = await action();
-    final json = response.data;
-
-    if (json == null) {
-      throw NetworkException(
-        message: 'An unexpected error occurred.',
-        statusCode: response.statusCode,
-      );
-    }
-
-    final envelope = BaseResponse<void>.fromJson(json, (_) {});
-    if (!envelope.success) {
-      throw NetworkException(
-        message: envelope.message,
-        statusCode: envelope.status,
-      );
-    }
+    return envelope.data;
   }
 }
 
